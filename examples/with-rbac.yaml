@@ -1,0 +1,57 @@
+# Configuration with RBAC enabled
+# This example shows how to configure agent-level permissions using Slack user groups
+
+# Slack API credentials
+secrets:
+  slackBotToken: "xoxb-your-bot-token-here"
+  slackAppToken: "xapp-your-app-token-here"
+  slackSigningSecret: "your-signing-secret-here"
+
+# Kagent configuration
+config:
+  kagentBaseUrl: "http://kagent-controller.kagent.svc.cluster.local:8083"
+  logLevel: "INFO"
+
+# Agent permissions configuration
+# This maps Slack user groups to agent access
+permissions:
+  # Global settings
+  settings:
+    enforce_permissions: true  # Enable RBAC enforcement
+
+  # Agent-specific permissions
+  agent_permissions:
+    # Kubernetes agent - restricted to SRE team
+    kagent/k8s-agent:
+      user_groups:
+        - S0T8FCWSB  # Slack user group ID for SRE team
+      users:
+        - admin@company.com
+      deny_message: "K8s agent requires @sre-team membership. Contact #sre for access."
+
+    # Security agent - restricted to security team
+    kagent/security-agent:
+      user_groups:
+        - S0T8FCWSC  # Slack user group ID for security team
+      users:
+        - security-lead@company.com
+      deny_message: "Security agent requires @security-team membership."
+
+    # Research agent - available to all data teams
+    kagent/research-agent:
+      user_groups:
+        - S0T8FCWSD  # Data science team
+        - S0T8FCWSE  # Analytics team
+      deny_message: "Research agent requires data team membership."
+
+# Resources
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Multiple replicas for availability
+replicaCount: 2

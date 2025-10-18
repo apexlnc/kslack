@@ -1,0 +1,76 @@
+# Production configuration for kslack
+# This configuration demonstrates best practices for production deployments
+
+# Global labels for resource tracking
+labels:
+  environment: production
+  team: platform
+  managed-by: kagent
+
+# Slack API credentials (use external secrets in production)
+# Example: Use external-secrets or sealed-secrets to manage these
+secrets:
+  slackBotToken: ""  # Set via --set or external secrets
+  slackAppToken: ""  # Set via --set or external secrets
+  slackSigningSecret: ""  # Set via --set or external secrets
+
+# Kagent configuration
+config:
+  # Production Kagent endpoint
+  kagentBaseUrl: "http://kagent-controller.kagent.svc.cluster.local:8083"
+
+  # Request timeout (seconds)
+  kagentTimeout: "60"
+
+  # Logging level
+  logLevel: "INFO"
+
+# Production-grade resources
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Enable autoscaling for high availability
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Node selection for dedicated workload nodes
+nodeSelector:
+  workload-type: ai-agents
+
+# Tolerations for tainted nodes
+tolerations:
+  - key: "ai-workload"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+# Anti-affinity for high availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: kslack
+          topologyKey: kubernetes.io/hostname
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Service account with custom annotations
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/kslack-role"

@@ -1,0 +1,33 @@
+# Basic configuration for kslack
+# This is a minimal Helm values file to get started
+
+# Slack API credentials (required)
+# Get these from your Slack app: https://api.slack.com/apps
+secrets:
+  slackBotToken: "xoxb-your-bot-token-here"
+  slackAppToken: "xapp-your-app-token-here"
+  slackSigningSecret: "your-signing-secret-here"
+
+# Kagent configuration
+config:
+  # Point to your Kagent controller
+  kagentBaseUrl: "http://kagent-controller.kagent.svc.cluster.local:8083"
+
+  # Logging level
+  logLevel: "INFO"
+
+# Use minimal resources for testing
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Disable autoscaling for basic setup
+autoscaling:
+  enabled: false
+
+# Single replica for testing
+replicaCount: 1

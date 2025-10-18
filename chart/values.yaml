@@ -1,0 +1,171 @@
+# Default values for kslack
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Override the name of the chart
+nameOverride: ""
+# -- Override the full name of the chart
+fullnameOverride: ""
+
+# -- Number of replicas
+replicaCount: 1
+
+image:
+  # -- Image registry
+  registry: ghcr.io
+  # -- Image repository
+  repository: kagent-dev/kslack
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag (defaults to chart appVersion)
+  tag: ""
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use
+  name: ""
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# -- Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+
+# -- Slack API credentials (required for kslack to function)
+# IMPORTANT: Set these via Helm values or external secrets management
+# DO NOT commit actual tokens to version control
+secrets:
+  # -- Slack Bot User OAuth Token (starts with xoxb-)
+  # Obtain from: Slack App > OAuth & Permissions > Bot User OAuth Token
+  slackBotToken: ""
+
+  # -- Slack App-Level Token for Socket Mode (starts with xapp-)
+  # Obtain from: Slack App > Basic Information > App-Level Tokens
+  slackAppToken: ""
+
+  # -- Slack Signing Secret for request verification
+  # Obtain from: Slack App > Basic Information > App Credentials
+  slackSigningSecret: ""
+
+# -- Application configuration
+config:
+  # -- Kagent API base URL
+  kagentBaseUrl: "http://kagent-controller.kagent.svc.cluster.local:8083"
+
+  # -- Kagent timeout for agent requests (seconds)
+  kagentTimeout: "30"
+
+  # -- Health server bind address
+  serverHost: "0.0.0.0"
+
+  # -- Health server port
+  serverPort: 8080
+
+  # -- Logging level (DEBUG, INFO, WARNING, ERROR)
+  logLevel: "INFO"
+
+  # -- Default agent namespace (optional)
+  defaultAgentNamespace: ""
+
+  # -- Default agent name (optional)
+  defaultAgentName: ""
+
+# -- Agent access permissions for RBAC
+# Configure which Slack users/groups can access which agents
+permissions:
+  agent_permissions: {}
+  # Example configuration:
+  # agent_permissions:
+  #   kagent/k8s-agent:
+  #     user_groups:
+  #       - S0T8FCWSB  # Slack user group ID
+  #     users:
+  #       - admin@company.com
+  #     deny_message: "K8s agent requires @sre-team membership"
+  settings:
+    enforce_permissions: false
+
+# -- Additional environment variables
+env: []
+# - name: CUSTOM_VAR
+#   value: "custom-value"
+
+# -- Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# -- Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+# Example:
+# nodeSelector:
+#   workload-type: ai-agents
+
+# -- Tolerations for pod assignment
+tolerations: []
+# Example:
+# tolerations:
+# - key: "ai-workload"
+#   operator: "Equal"
+#   value: "true"
+#   effect: "NoSchedule"
+
+# -- Affinity for pod assignment
+affinity: {}
+# Example:
+# affinity:
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#     - weight: 100
+#       podAffinityTerm:
+#         labelSelector:
+#           matchLabels:
+#             app.kubernetes.io/name: kslack
+#         topologyKey: kubernetes.io/hostname
+
+# -- Service configuration
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 8080
+  # -- Service annotations
+  annotations: {}
+
+# -- Pod Disruption Budget configuration
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# -- Additional labels to add to all resources
+labels: {}
